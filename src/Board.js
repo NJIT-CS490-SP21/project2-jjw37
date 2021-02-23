@@ -1,20 +1,30 @@
-import React from 'react'
-import { Box } from './Box.js'
+import { Box } from './Box.js';
+import React, { useEffect, useState } from "react";
 
-function getSquare(i) {
-    return <Box value={i}/>;
-}
 
 export function Board(props) {
+    const initialState = Array(9).fill(null);
+    const [box, setBox] = useState(initialState);
+    
+    function handleClick(i) {
+        const newBox = [...box];
+        newBox[i] = 'X';
+        setBox(newBox);
+    }
+    
+    function renderBox(i) {
+    return <Box value={box[i]} onClick= {() => handleClick(i)} />;
+    }
+    
     return <div className="board">
-        {getSquare(0)}
-        {getSquare(1)}
-        {getSquare(2)}
-        {getSquare(3)}
-        {getSquare(4)}
-        {getSquare(5)}
-        {getSquare(6)}
-        {getSquare(7)}
-        {getSquare(8)}
+        {renderBox(0)}
+        {renderBox(1)}
+        {renderBox(2)}
+        {renderBox(3)}
+        {renderBox(4)}
+        {renderBox(5)}
+        {renderBox(6)}
+        {renderBox(7)}
+        {renderBox(8)}
     </div>;
 }
