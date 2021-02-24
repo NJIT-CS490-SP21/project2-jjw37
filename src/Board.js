@@ -7,14 +7,16 @@ const socket = io();
 export function Board(props) {
     const initialState = Array(9).fill(null);
     const [box, setBox] = useState(initialState);
+    const [xNext, setXNext] = useState(true);
     
     
     
     function handleClick(i) {
         const newBox = [...box];
-        newBox[i] = 'X';
+        newBox[i] = xNext ? 'X' : 'O';
         setBox(newBox);
-        socket.emit('move', {i: i});
+        setXNext(!xNext);
+        socket.emit('move', {i: i, xNext: xNext});
     }
     
     useEffect(() => {
@@ -29,15 +31,24 @@ export function Board(props) {
     return <Box value={box[i]} onClick= {() => handleClick(i)} />;
     }
     
-    return <div className="board">
-        {renderBox(0)}
-        {renderBox(1)}
-        {renderBox(2)}
-        {renderBox(3)}
-        {renderBox(4)}
-        {renderBox(5)}
-        {renderBox(6)}
-        {renderBox(7)}
-        {renderBox(8)}
-    </div>;
-}
+    const curPlayer = `Current Player is: ${xNext ? "X" : "O"}`;
+    
+    return (
+        <div>
+        <div className = "curPlayer"> 
+            {curPlayer}
+        </div>
+        <div className="board">
+            {renderBox(0)}
+            {renderBox(1)}
+            {renderBox(2)}
+            {renderBox(3)}
+            {renderBox(4)}
+            {renderBox(5)}
+            {renderBox(6)}
+            {renderBox(7)}
+            {renderBox(8)}
+        </div>
+        </div>
+    );
+};
