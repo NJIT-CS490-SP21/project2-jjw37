@@ -34,6 +34,12 @@ export function Board(props) {
         return null;
     }
     
+    function restartGame() {
+        setXNext(prevNext => true)
+        setCounter(prevCount => 0)
+        setBox(prevBox => initialState)
+        
+    }
     
     function handleClick(i) {
         const newBox = [...box];
@@ -72,6 +78,14 @@ export function Board(props) {
         winnerPlayer = 'Game ends in draw'
     }
     
+    function restartButton(){
+        if(winner){
+            return <button className="restart">
+                Restart Game
+            </button>;
+        }
+    }
+    
     return (
         <div>
         <div className = "curPlayer"> 
@@ -90,6 +104,12 @@ export function Board(props) {
         </div>
         <div className= "winnerStatus">
                 {winnerPlayer}
+        
+        </div>
+        <div align = "center">
+        <button className="restart" onClick= {() => restartGame()}>
+                Restart Game
+            </button>
         </div>
         </div>
     );
