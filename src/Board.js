@@ -8,21 +8,51 @@ export function Board(props) {
     const initialState = Array(9).fill(null);
     const [box, setBox] = useState(initialState);
     const [xNext, setXNext] = useState(true);
+    const [counter, setCounter] = useState(0)
     
+    function calculateWinner(boxes) {
+        const lines = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6],
+        ]; 
+        for (let line of lines) {
+            const [a, b, c] = line;
+            if (
+                boxes[a] &&
+                boxes[a] === boxes[b] &&
+                boxes[a] === boxes[c]
+            ) {
+            return boxes[a];
+            }
+        }
+        return null;
+    }
     
     
     function handleClick(i) {
         const newBox = [...box];
+        const winnerStat = Boolean(calculateWinner(newBox));
+        const squareState = Boolean(newBox[i]);
+         if (winnerStat || squareState) return;
         newBox[i] = xNext ? 'X' : 'O';
         setBox(newBox);
         setXNext(!xNext);
-         socket.emit('move', {i: i, xNext: !xNext});
+        setCounter(prevCount => prevCount + 1)
+        socket.emit('move', {i: i, xNext: !xNext});
+        
     }
     
     useEffect(() => {
     socket.on('move', (data) => {
         console.log(data);
         console.log(Box[data.i]);
+        setCounter(prevCount => prevCount + 1)
         setXNext(prevVal => data.xNext);
         setBox(prevBox => [...prevBox, prevBox[data.i] = !data.xNext ? 'X' : 'O']);
     });
@@ -32,7 +62,15 @@ export function Board(props) {
     return <Box value={box[i]} onClick= {() => handleClick(i)} />;
     }
     
+    var winnerPlayer = 'The game is in progress'
     const curPlayer = `Current Player is: ${xNext ? "X" : "O"}`;
+    const winner = calculateWinner(box)
+    if(winner) {
+       winnerPlayer = `The winner is player ${winner}`
+    }
+    if(counter === 9) {
+        winnerPlayer = 'Game ends in draw'
+    }
     
     return (
         <div>
@@ -49,6 +87,9 @@ export function Board(props) {
             {renderBox(6)}
             {renderBox(7)}
             {renderBox(8)}
+        </div>
+        <div className= "winnerStatus">
+                {winnerPlayer}
         </div>
         </div>
     );

@@ -1,5 +1,5 @@
 .board {
-    margin: 50px auto ;
+    margin: 20px auto ;
     width: 300px; /* Total horizontal dimensions */
 	height: 300px; /* Total vertical dimensions */
 	display: grid; /* Enables CSS Grid */ 
@@ -10,4 +10,9 @@
 .box {
     border: 1px solid black; /* Shows the lines in the CSS grid */
     text-align: center;
+}
+
+.curPlayer, .winnerStatus{
+    text-align: center;
+    margin: 5px;
 }
