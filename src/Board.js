@@ -16,14 +16,15 @@ export function Board(props) {
         newBox[i] = xNext ? 'X' : 'O';
         setBox(newBox);
         setXNext(!xNext);
-        socket.emit('move', {i: i, xNext: xNext});
+         socket.emit('move', {i: i, xNext: !xNext});
     }
     
     useEffect(() => {
     socket.on('move', (data) => {
         console.log(data);
         console.log(Box[data.i]);
-        setBox(prevBox => [...prevBox, prevBox[data.i] = 'X']);
+        setXNext(prevVal => data.xNext);
+        setBox(prevBox => [...prevBox, prevBox[data.i] = !data.xNext ? 'X' : 'O']);
     });
   }, []);
     
