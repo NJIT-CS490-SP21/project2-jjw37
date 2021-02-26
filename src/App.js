@@ -1,12 +1,40 @@
 import './App.css';
 import './Board.css'
 import { Board } from './Board.js';
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import io from 'socket.io-client';
+
+const socket = io();
 
 function App() {
+  const inputRef = useRef();
+  const [isLogin, setLogin] = useState(false);
+  
+  useEffect(() => {
+    socket.on('login', (data) => {
+    
+    });
+  }, []);
+  
+  function loginButton() {
+    const userName = inputRef.current.value;
+    socket.emit('login', {userName: userName});
+    setLogin(true);
+  }
+  
   return (
     <div>
-      <Board />
+      {isLogin === true ? (
+        <div>
+          <Board />
+        </div>
+      ) : (
+      <div align ="center">
+      <h1>enter username</h1>
+      <input ref={inputRef} type="text" />
+      <button onClick={loginButton}>Login</button>
+      </div>
+      )}
     </div>
   );
 }
