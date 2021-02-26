@@ -26,6 +26,11 @@ def on_connect():
 @socketio.on('disconnect')
 def on_disconnect():
     print('User disconnected!')
+    
+@socketio.on('restart')
+def on_restart(data): 
+    print(str(data))
+    socketio.emit('restart',  data, broadcast=True, include_self=False)
 
 @socketio.on('move')
 def on_move(data): 

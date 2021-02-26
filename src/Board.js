@@ -34,13 +34,6 @@ export function Board(props) {
         return null;
     }
     
-    function restartGame() {
-        setXNext(prevNext => true)
-        setCounter(prevCount => 0)
-        setBox(prevBox => initialState)
-        
-    }
-    
     function handleClick(i) {
         const newBox = [...box];
         const winnerStat = Boolean(calculateWinner(newBox));
@@ -55,14 +48,34 @@ export function Board(props) {
     }
     
     useEffect(() => {
+    socket.on('restart', (data) => {
+        console.log("lemons")
+        setXNext(prevNext => true)
+        setCounter(prevCount => 0)
+        const freshState = Array(9).fill(null);
+        setBox(freshState)
+    });
+    }, []);
+    
+    useEffect(() => {
     socket.on('move', (data) => {
-        console.log(data);
-        console.log(Box[data.i]);
+        console.log("soda");
         setCounter(prevCount => prevCount + 1)
         setXNext(prevVal => data.xNext);
         setBox(prevBox => [...prevBox, prevBox[data.i] = !data.xNext ? 'X' : 'O']);
     });
   }, []);
+  
+    
+    function restartGame() {
+        if(!winner || !counter === 9){
+            return
+        }
+        setXNext(prevNext => true)
+        setCounter(prevCount => 0)
+        setBox(prevBox => initialState)
+        socket.emit('restart', {counter: counter});
+    }
     
     function renderBox(i) {
     return <Box value={box[i]} onClick= {() => handleClick(i)} />;
@@ -76,14 +89,6 @@ export function Board(props) {
     }
     if(counter === 9) {
         winnerPlayer = 'Game ends in draw'
-    }
-    
-    function restartButton(){
-        if(winner){
-            return <button className="restart">
-                Restart Game
-            </button>;
-        }
     }
     
     return (
