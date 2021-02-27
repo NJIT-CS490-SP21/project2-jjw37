@@ -40,7 +40,7 @@ export function Board(props) {
         const newBox = [...box];
         const winnerStat = Boolean(calculateWinner(newBox));
         const squareState = Boolean(newBox[i]);
-         if (winnerStat || squareState || isSpectator === true && isPlayer === false) return;
+        if (winnerStat || squareState || isSpectator === true && isPlayer === false) return;
         newBox[i] = xNext ? 'X' : 'O';
         setBox(newBox);
         setXNext(!xNext);
@@ -65,13 +65,11 @@ export function Board(props) {
         console.log(data.counter)
         if(data.counter > 2 && isPlayer === false) setSpectator(true);
         if(data.counter < 3) setPlayer(true);
-        console.log(isSpectator)
     });
     }, []);
     
     useEffect(() => {
     socket.on('move', (data) => {
-        console.log("soda");
         setCounter(prevCount => prevCount + 1)
         setXNext(prevVal => data.xNext);
         setBox(prevBox => [...prevBox, prevBox[data.i] = !data.xNext ? 'X' : 'O']);
@@ -80,7 +78,8 @@ export function Board(props) {
   
     
     function restartGame() {
-        if(!winner || !counter === 9 || isSpectator === true && isPlayer === false){
+        if(isSpectator === true && isPlayer === false) return;
+        if(!winner || !counter === 9){
             return
         }
         setXNext(prevNext => true)
