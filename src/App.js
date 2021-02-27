@@ -1,5 +1,5 @@
 import './App.css';
-import './Board.css'
+import './Board.css';
 import { Board } from './Board.js';
 import { useState, useRef, useEffect } from 'react'
 import io from 'socket.io-client';
@@ -9,10 +9,12 @@ const socket = io();
 function App() {
   const inputRef = useRef();
   const [isLogin, setLogin] = useState(false);
+  const [users, setUsers] = useState([]);
   
   useEffect(() => {
     socket.on('login', (data) => {
-    
+      console.log(data)
+      setUsers(data.users);
     });
   }, []);
   
@@ -25,8 +27,14 @@ function App() {
   return (
     <div>
       {isLogin === true ? (
-        <div>
-          <Board />
+        <div  className = 'grid'>
+          <div className = 'column1'>
+            <Board />
+          </div>
+          <div  className = 'column2'>
+            <h2>User list</h2>
+              {users.map((user) => <li>{user}</li>)}
+          </div>
         </div>
       ) : (
       <div align ="center">

@@ -7,6 +7,10 @@ app = Flask(__name__, static_folder='./build/static')
 
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
+userList = []
+counter = 0
+users = []
+
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
@@ -30,7 +34,24 @@ def on_disconnect():
 @socketio.on('login')
 def on_login(data):
     print(str(data))
-    socketio.emit('login',  data, broadcast=True, include_self=False)
+    global userList
+    global counter
+    if data['userName'] not in userList:
+        userList.append(data['userName'])
+    else:
+        return
+    global users 
+    counter = counter + 1
+    if counter == 1:
+        users.append("Player X " + data['userName'])
+    if counter == 2:
+        users.append("Player O " + data['userName'])
+    if counter > 2:
+        users.append("spectator " + data['userName'])
+    print(userList)
+    socketio.emit('login', {'users': users})
+    socketio.emit('user_count', {'counter': counter}, broadcast=False, include_self=True)
+    
     
 @socketio.on('restart')
 def on_restart(data): 
