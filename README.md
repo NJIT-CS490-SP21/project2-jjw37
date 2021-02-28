@@ -5,7 +5,7 @@
 2. `pip install -r requirements.txt`
 3.  `pip install flask-socketio`
 3. `pip install flask-cors`
-4. in director: `npm install socket.io-client --save`
+4. in directory: `npm install socket.io-client --save`
 
 ## Setup
 1. Run `echo "DANGEROUSLY_DISABLE_HOST_CHECK=true" > .env.development.local` in the project directory
