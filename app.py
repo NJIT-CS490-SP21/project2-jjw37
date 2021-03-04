@@ -53,10 +53,10 @@ def on_login(data):
     global userList
     global counter
     global leaderboard
-    db_user = models.Player(username=data['userName'], score=100)
+    db_user = models.Person(username=data['userName'], score=100)
     db.session.add(db_user)
     db.session.commit()
-    db_query = models.Player.query.all()
+    db_query = models.Person.query.all()
     for row in db_query:
         leaderboard[row.username] = row.score
     print(leaderboard)
