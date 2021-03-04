@@ -55,10 +55,12 @@ function App() {
                     <th>username</th>
                     <th>score</th>
                   </tr>
-                  {lBoardName.map((name, idx) => <tr>
+                  {lBoardName.map((name, idx) => 
+                  <tr style={playerName === name ? { 'backgroundColor': '#0000ff80'} : {'backgroundColor': '#ff000080'}}>
                     <td>{name}</td>
                     <td>{lBoardScore[idx]}</td>
-                  </tr>)}
+                  </tr>
+                  )}
                 </table>
                 </div>
                 ) : (
