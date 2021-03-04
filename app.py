@@ -2,6 +2,10 @@ import os
 from flask import Flask, send_from_directory, json, session
 from flask_socketio import SocketIO
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv())
 
 app = Flask(__name__, static_folder='./build/static')
 
@@ -10,6 +14,17 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 userList = []
 counter = 0
 users = []
+leaderboard = {}
+
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+import models
+db.create_all()
+
 
 socketio = SocketIO(
     app,
@@ -37,6 +52,14 @@ def on_login(data):
     print(str(data))
     global userList
     global counter
+    global leaderboard
+    db_user = models.Player(username=data['userName'], score=100)
+    db.session.add(db_user)
+    db.session.commit()
+    db_query = models.Player.query.all()
+    for row in db_query:
+        leaderboard[row.username] = row.score
+    print(leaderboard)
     if data['userName'] not in userList:
         userList.append(data['userName'])
     else:
