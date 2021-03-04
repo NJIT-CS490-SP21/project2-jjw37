@@ -10,6 +10,7 @@ function App() {
   const inputRef = useRef();
   const [isLogin, setLogin] = useState(false);
   const [users, setUsers] = useState([]);
+  const [leaderBoard, setLeaderBoard] = useState([]);
   
   useEffect(() => {
     socket.on('login', (data) => {
