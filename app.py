@@ -23,8 +23,6 @@ APP.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 DB = SQLAlchemy(APP)
 
 import models
-DB.create_all()
-
 
 SOCKETIO = SocketIO(
     APP,
@@ -95,9 +93,11 @@ def on_restart(data):
 def on_move(data):
     print(str(data))
     SOCKETIO.emit('move', data, broadcast=True, include_self=False)
-
-SOCKETIO.run(
-    APP,
-    host=os.getenv('IP', '0.0.0.0'),
-    port=8081 if os.getenv('C9_PORT') else int(os.getenv('PORT', 8081)),
-)
+    
+if __name__ == "__main__":
+    DB.create_all()
+    SOCKETIO.run(
+        APP,
+        host=os.getenv('IP', '0.0.0.0'),
+        port=8081 if os.getenv('C9_PORT') else int(os.getenv('PORT', 8081)),
+    )
