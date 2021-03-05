@@ -15,6 +15,7 @@ USER_LIST = []
 COUNTER = 0
 USERS = []
 LEADER_BOARD = {}
+WINNER_COUNT = 0
 
 APP.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 
@@ -44,6 +45,9 @@ def on_connect():
 @SOCKETIO.on('disconnect')
 def on_disconnect():
     print('User disconnected!')
+    
+    
+
 
 @SOCKETIO.on('login')
 def on_login(data):
@@ -80,18 +84,63 @@ def on_login(data):
     if COUNTER > 2:
         USERS.append("spectator " + data['userName'])
     print(USER_LIST)
+    print(COUNTER)
     SOCKETIO.emit('login', {'users': USERS, 'leaderBoardName': leader_board_name, 'leaderBoardScore': leader_board_score})
     SOCKETIO.emit('user_count', {'counter': COUNTER}, broadcast=False, include_self=True)
 
+@SOCKETIO.on('winner')
+def on_winner(data):
+   
+    board = {}
+    board_name = []
+    board_score = []
+    global WINNER_COUNT
+    print("The winner count in on winner is " + str(WINNER_COUNT))
+    WINNER_COUNT = WINNER_COUNT + 1
+    if WINNER_COUNT >= 2:
+        return
+    global USER_LIST
+    player_list = USER_LIST
+    winner_player = data['xNext']
+    if winner_player == True:
+        print('winner is ' + player_list[1])
+        winner = player_list[1]
+        print('loser is ' + player_list[0])
+        loser = player_list[0]
+    if winner_player == False:
+        print('winner is ' + player_list[0])
+        winner = player_list[0]
+        print('loser is ' + player_list[1])
+        loser = player_list[1]
+    print("steve")
+    winner_qr = DB.session.query(models.Player).filter_by(username = winner).first()
+    winner_qr.score = winner_qr.score + 1
+    DB.session.commit()
+    loser_qr = DB.session.query(models.Player).filter_by(username = loser).first()
+    loser_qr.score = loser_qr.score - 1
+    DB.session.commit()
+    db_query = models.Player.query.order_by(models.Player.score.desc()).all()
+    for row in db_query:
+        board[row.username] = row.score
+    for name in board:
+        board_name.append(name)
+        board_score.append(board[name])
+    print(board)
+    SOCKETIO.emit('updateBoard', {'boardName': board_name, 'boardScore': board_score})
 
 @SOCKETIO.on('restart')
 def on_restart(data):
+    global WINNER_COUNT
+    WINNER_COUNT = 0
+    print("The winner count is " + str(WINNER_COUNT))
     print(str(data))
     SOCKETIO.emit('restart', data, broadcast=True, include_self=False)
 
 @SOCKETIO.on('move')
 def on_move(data):
     print(str(data))
+    global WINNER_COUNT
+    WINNER_COUNT = 0
     SOCKETIO.emit('move', data, broadcast=True, include_self=False)
     
 if __name__ == "__main__":

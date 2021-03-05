@@ -8,9 +8,11 @@ export function Board(props) {
     const initialState = Array(9).fill(null);
     const [box, setBox] = useState(initialState);
     const [xNext, setXNext] = useState(true);
-    const [counter, setCounter] = useState(0)
-    const [isSpectator, setSpectator] = useState(false)
-    const [isPlayer, setPlayer] = useState(false)
+    const [counter, setCounter] = useState(0);
+    const [isSpectator, setSpectator] = useState(false);
+    const [isPlayer, setPlayer] = useState(false);
+    const [isWinner, setWinner] = useState(false);
+    
     
     function calculateWinner(boxes) {
         const lines = [
@@ -46,7 +48,11 @@ export function Board(props) {
         setXNext(!xNext);
         setCounter(prevCount => prevCount + 1)
         socket.emit('move', {i: i, xNext: !xNext});
-        
+        const stateAfter = Boolean(calculateWinner(newBox));
+        if(stateAfter === true) {
+            setWinner(true);
+            socket.emit('winner', {xNext: !xNext})
+        }
     }
     
     useEffect(() => {
@@ -56,17 +62,18 @@ export function Board(props) {
         setCounter(prevCount => 0)
         const freshState = Array(9).fill(null);
         setBox(freshState)
+        setWinner(false);
     });
     }, []);
     
     
     useEffect(() => {
     socket.on('user_count', (data) => {
-        console.log(data.counter)
-        if(data.counter > 2 && isPlayer === false) setSpectator(true);
-        if(data.counter < 3) setPlayer(true);
+        if(data.counter > 2 && isPlayer === false) setSpectator( prevSpectator => true);
+        if(data.counter < 3) setPlayer(prevPlayer =>true);
     });
     }, []);
+    
     
     useEffect(() => {
     socket.on('move', (data) => {
@@ -79,12 +86,15 @@ export function Board(props) {
     
     function restartGame() {
         if(isSpectator === true && isPlayer === false) return;
-        if(!winner || !counter === 9){
+        console.log(counter)
+        const winnerStat = Boolean(calculateWinner(box));
+        if(winnerStat === false && counter !== 9){
             return
         }
         setXNext(prevNext => true)
         setCounter(prevCount => 0)
         setBox(prevBox => initialState)
+        setWinner(false);
         socket.emit('restart', {counter: counter});
     }
     
@@ -94,9 +104,9 @@ export function Board(props) {
     
     var winnerPlayer = 'The game is in progress'
     const curPlayer = `Current Player is: ${xNext ? "X" : "O"}`;
-    const winner = calculateWinner(box)
+    const winner = calculateWinner(box);
     if(winner) {
-       winnerPlayer = `The winner is player ${winner}`
+        winnerPlayer = `The winner is player ${winner}`
     }
     if(counter === 9) {
         winnerPlayer = 'Game ends in draw'

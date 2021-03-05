@@ -15,18 +15,25 @@ function App() {
   const [lBoardScore, setLBoardScore] = useState([]);
   const [playerName, setPlayerName] = useState(null);
   
+  
   useEffect(() => {
     socket.on('login', (data) => {
-      console.log(data)
+      console.log(data);
       setUsers(data.users);
       setLBoardName(data.leaderBoardName);
       setLBoardScore(data.leaderBoardScore);
+    });
+    socket.on('updateBoard', (data) => {
+      console.log(data);
+      setLBoardName(data.boardName);
+      setLBoardScore(data.boardScore);
     });
   }, []);
   
   function loginButton() {
     const userName = inputRef.current.value;
     setPlayerName(userName);
+    
     socket.emit('login', {userName: userName});
     setLogin(true);
   }
@@ -51,6 +58,7 @@ function App() {
                 {showLBoard === true ? (
                 <div>
                 <table>
+                <tbody>
                   <tr>
                     <th>username</th>
                     <th>score</th>
@@ -61,6 +69,7 @@ function App() {
                     <td>{lBoardScore[idx]}</td>
                   </tr>
                   )}
+                </tbody>
                 </table>
                 </div>
                 ) : (
