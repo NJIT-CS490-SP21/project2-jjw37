@@ -79,7 +79,11 @@ export function Board(props) {
     socket.on('move', (data) => {
         setCounter(prevCount => prevCount + 1)
         setXNext(prevVal => data.xNext);
-        setBox(prevBox => [...prevBox, prevBox[data.i] = !data.xNext ? 'X' : 'O']);
+        setBox((prevBox) => {
+            const socketBox = [...prevBox];
+            socketBox[data.i] = !data.xNext ? 'X' : 'O';
+            return socketBox
+        });
     });
   }, []);
   
@@ -108,7 +112,7 @@ export function Board(props) {
     if(winner) {
         winnerPlayer = `The winner is player ${winner}`
     }
-    if(counter === 9) {
+    if(counter === 9 && isWinner === false) {
         winnerPlayer = 'Game ends in draw'
     }
     

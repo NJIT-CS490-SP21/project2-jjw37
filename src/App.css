@@ -2,3 +2,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
 }
+
+table , td, tr {
+    border: 1px solid #A9A9A9;
+}
