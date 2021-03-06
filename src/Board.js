@@ -66,15 +66,6 @@ export function Board(props) {
     });
     }, []);
     
-    
-    useEffect(() => {
-    socket.on('user_count', (data) => {
-        if(data.counter > 2 && isPlayer === false) setSpectator( prevSpectator => true);
-        if(data.counter < 3) setPlayer(prevPlayer =>true);
-    });
-    }, []);
-    
-    
     useEffect(() => {
     socket.on('move', (data) => {
         console.log(data.i);
@@ -88,8 +79,14 @@ export function Board(props) {
         });
     });
   }, []);
-  
     
+    useEffect(() => {
+    socket.on('user_count', (data) => {
+        if(data.counter > 2 && isPlayer === false) setSpectator( prevSpectator => true);
+        if(data.counter < 3) setPlayer(prevPlayer =>true);
+    });
+    }, []);
+  
     function restartGame() {
         if(isSpectator === true && isPlayer === false) return;
         console.log(counter)
