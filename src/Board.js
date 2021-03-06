@@ -71,7 +71,7 @@ export function Board(props) {
     
     useEffect(() => {
     socket.on('restart', (data) => {
-        console.log("restart");
+        console.log("restart pressed");
         setXNext(prevNext => true);
         setCounter(prevCount => 0);
         const freshState = Array(9).fill(null);
