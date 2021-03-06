@@ -77,8 +77,9 @@ export function Board(props) {
     
     useEffect(() => {
     socket.on('move', (data) => {
-        console.log(data)
-        setCounter(prevCount => prevCount + 1)
+        console.log(data.i);
+        console.log(data.xNext);
+        setCounter(prevCount => prevCount + 1);
         setXNext(prevVal => data.xNext);
         setBox((prevBox) => {
             const socketBox = [...prevBox];
