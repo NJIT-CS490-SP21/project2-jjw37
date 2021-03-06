@@ -57,14 +57,17 @@ def on_login(data):
     global LEADER_BOARD
     leader_board_name = []
     leader_board_score = []
-    db_query = models.Player.query.order_by(models.Player.score.desc()).all()
-    for row in db_query:
-        LEADER_BOARD[row.username] = row.score
-    if data['userName'] not in LEADER_BOARD:
-        db_user = models.Player(username=data['userName'], score=100)
-        DB.session.add(db_user)
-        DB.session.commit()
-        LEADER_BOARD[data['userName']] = 100
+    try :
+        db_query = models.Player.query.order_by(models.Player.score.desc()).all()
+        for row in db_query:
+            LEADER_BOARD[row.username] = row.score
+        if data['userName'] not in LEADER_BOARD:
+            db_user = models.Player(username=data['userName'], score=100)
+            DB.session.add(db_user)
+            DB.session.commit()
+            LEADER_BOARD[data['userName']] = 100
+    except:
+        LEADER_BOARD['Man'] = 22
     print(LEADER_BOARD)
     for name in LEADER_BOARD:
         leader_board_name.append(name)
@@ -113,18 +116,22 @@ def on_winner(data):
         print('loser is ' + player_list[1])
         loser = player_list[1]
     print("steve")
-    winner_qr = DB.session.query(models.Player).filter_by(username = winner).first()
-    winner_qr.score = winner_qr.score + 1
-    DB.session.commit()
-    loser_qr = DB.session.query(models.Player).filter_by(username = loser).first()
-    loser_qr.score = loser_qr.score - 1
-    DB.session.commit()
-    db_query = models.Player.query.order_by(models.Player.score.desc()).all()
-    for row in db_query:
-        board[row.username] = row.score
-    for name in board:
-        board_name.append(name)
-        board_score.append(board[name])
+    try:
+        winner_qr = DB.session.query(models.Player).filter_by(username = winner).first()
+        winner_qr.score = winner_qr.score + 1
+        DB.session.commit()
+        loser_qr = DB.session.query(models.Player).filter_by(username = loser).first()
+        loser_qr.score = loser_qr.score - 1
+        DB.session.commit()
+        db_query = models.Player.query.order_by(models.Player.score.desc()).all()
+        for row in db_query:
+            board[row.username] = row.score
+        for name in board:
+            board_name.append(name)
+            board_score.append(board[name])
+    except:
+        board_score = [12]
+        board_name = ['bill']
     print(board)
     SOCKETIO.emit('updateBoard', {'boardName': board_name, 'boardScore': board_score})
 
