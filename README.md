@@ -20,7 +20,17 @@
 
 ## Setup
 1. Run `echo "DANGEROUSLY_DISABLE_HOST_CHECK=true" > .env.development.local` in the project directory
+2. run before starting app
+`python`
+`>> from app import DB`
+`>> import models`
+`>> DB.create_all()`
+`>> admin = models.Player(username='admin', score=100)`
+`>> db.session.add(admin)`
+`>> db.session.commit()`
+`>> exit()`
 2. `npm run start` and `python app.py`
+
 
 ## Problems/future additions
 1. One problem I would have like to have fixed is to have a logout event that will update the user list as people log out. 
