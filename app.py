@@ -50,6 +50,21 @@ def on_disconnect():
     """socket event for user disconnect"""
     print('User disconnected!')
 
+def add_user(user):
+    """Adds user to USERS"""
+    global USERS
+    global COUNTER
+    new_user = "Player X " + user
+    if COUNTER == 1:
+        new_user = "Player X " + user
+        USERS.append("Player X " + user)
+    if COUNTER == 2:
+        new_user = "Player O " + user
+        USERS.append("Player O " + user)
+    if COUNTER > 2:
+        new_user = "Spectator " + user
+        USERS.append("spectator " + user)
+    return new_user
 
 @SOCKETIO.on('login')
 def on_login(data):
@@ -84,12 +99,7 @@ def on_login(data):
         return
     global USERS
     COUNTER = COUNTER + 1
-    if COUNTER == 1:
-        USERS.append("Player X " + data['userName'])
-    if COUNTER == 2:
-        USERS.append("Player O " + data['userName'])
-    if COUNTER > 2:
-        USERS.append("spectator " + data['userName'])
+    add_user(data['userName'])
     print(USER_LIST)
     print(COUNTER)
     SOCKETIO.emit(
@@ -102,12 +112,29 @@ def on_login(data):
                   broadcast=False,
                   include_self=True)
 
+def set_winner(players, is_winner):
+    """sets the winner and loser"""
+    winner_list = []
+    if is_winner:
+        print('winner is ' + players[1])
+        winner = players[1]
+        print('loser is ' + players[0])
+        loser = players[0]
+    if not is_winner:
+        print('winner is ' + players[0])
+        winner = players[0]
+        print('loser is ' + players[1])
+        loser = players[1]
+    winner_list.append(winner)
+    winner_list.append(loser)
+    return winner_list
 
 @SOCKETIO.on('winner')
 def on_winner(data):
     """socket event for winner, updates database of winner/loser score, returns updated list"""
 
     board = {}
+    winner_list = []
     board_name = []
     board_score = []
     global WINNER_COUNT
@@ -118,16 +145,9 @@ def on_winner(data):
     global USER_LIST
     player_list = USER_LIST
     winner_player = data['xNext']
-    if winner_player:
-        print('winner is ' + player_list[1])
-        winner = player_list[1]
-        print('loser is ' + player_list[0])
-        loser = player_list[0]
-    if not winner_player:
-        print('winner is ' + player_list[0])
-        winner = player_list[0]
-        print('loser is ' + player_list[1])
-        loser = player_list[1]
+    winner_list = set_winner(player_list, winner_player)
+    winner = winner_list[0]
+    loser = winner_list[1]
     print("steve")
     try:
         winner_qr = DB.session.query(
@@ -164,11 +184,15 @@ def on_restart(data):
     print(str(data))
     SOCKETIO.emit('restart', data, broadcast=True, include_self=False)
 
+def check_move(data):
+    """checks and prints move"""
+    print(str(data))
+    return((data))
 
 @SOCKETIO.on('move')
 def on_move(data):
     """socket event for move, will display updated board to all players/spectators"""
-    print(str(data))
+    check_move(data)
     global WINNER_COUNT
     WINNER_COUNT = 0
     SOCKETIO.emit('move', data, broadcast=True, include_self=False)
