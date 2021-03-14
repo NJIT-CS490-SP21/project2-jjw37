@@ -50,6 +50,7 @@ def on_disconnect():
     """socket event for user disconnect"""
     print('User disconnected!')
 
+
 def add_user(user):
     """Adds user to USERS"""
     global USERS
@@ -66,6 +67,33 @@ def add_user(user):
         USERS.append("spectator " + user)
     return new_user
 
+
+def query_db():
+    """query database for users"""
+    global LEADER_BOARD
+    db_query = models.Player.query.order_by(models.Player.score.desc()).all()
+    for row in db_query:
+        LEADER_BOARD[row.username] = row.score
+    players_db = models.Player.query.all()
+    players = []
+    for player in players_db:
+        players.append(player.username)
+    return players
+
+
+def add_db(user_name):
+    """add new user to database"""
+    db_user = models.Player(username=user_name, score=100)
+    DB.session.add(db_user)
+    DB.session.commit()
+    query_db()
+    players_db = models.Player.query.all()
+    players = []
+    for player in players_db:
+        players.append(player.username)
+    return players
+
+
 @SOCKETIO.on('login')
 def on_login(data):
     """returns current userlist and list of users from database with any new users added"""
@@ -76,15 +104,9 @@ def on_login(data):
     leader_board_name = []
     leader_board_score = []
     try:
-        db_query = models.Player.query.order_by(
-            models.Player.score.desc()).all()
-        for row in db_query:
-            LEADER_BOARD[row.username] = row.score
+        query_db()
         if data['userName'] not in LEADER_BOARD:
-            db_user = models.Player(username=data['userName'], score=100)
-            DB.session.add(db_user)
-            DB.session.commit()
-            LEADER_BOARD[data['userName']] = 100
+            add_db(data['userName'])
     except:
         LEADER_BOARD['Man'] = 22
     print(LEADER_BOARD)
@@ -112,6 +134,7 @@ def on_login(data):
                   broadcast=False,
                   include_self=True)
 
+
 def set_winner(players, is_winner):
     """sets the winner and loser"""
     winner_list = []
@@ -128,6 +151,23 @@ def set_winner(players, is_winner):
     winner_list.append(winner)
     winner_list.append(loser)
     return winner_list
+
+
+def update_db(winner, loser):
+    """updates the winner and loser scores"""
+    update_score = []
+    winner_qr = DB.session.query(
+        models.Player).filter_by(username=winner).first()
+    winner_qr.score = winner_qr.score + 1
+    DB.session.commit()
+    loser_qr = DB.session.query(
+        models.Player).filter_by(username=loser).first()
+    loser_qr.score = loser_qr.score - 1
+    DB.session.commit()
+    update_score.append(winner_qr.score)
+    update_score.append(loser_qr.score)
+    return update_score
+
 
 @SOCKETIO.on('winner')
 def on_winner(data):
@@ -150,14 +190,7 @@ def on_winner(data):
     loser = winner_list[1]
     print("steve")
     try:
-        winner_qr = DB.session.query(
-            models.Player).filter_by(username=winner).first()
-        winner_qr.score = winner_qr.score + 1
-        DB.session.commit()
-        loser_qr = DB.session.query(
-            models.Player).filter_by(username=loser).first()
-        loser_qr.score = loser_qr.score - 1
-        DB.session.commit()
+        update_db(winner, loser)
         db_query = models.Player.query.order_by(
             models.Player.score.desc()).all()
         for row in db_query:
@@ -184,10 +217,12 @@ def on_restart(data):
     print(str(data))
     SOCKETIO.emit('restart', data, broadcast=True, include_self=False)
 
+
 def check_move(data):
     """checks and prints move"""
     print(str(data))
-    return((data))
+    return data
+
 
 @SOCKETIO.on('move')
 def on_move(data):
